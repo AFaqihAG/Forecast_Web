@@ -1,0 +1,10 @@
+{
+    "servername": "localhost",
+    "username": "PUNYAKU",
+    "password": "bukanpunyamu",
+    "dbname": "punyaku",
+    "table_name": "WHB1_A",
+    "name_column": "W1_53PIC574MV",
+    "date_column": "Time_Stamp",
+    "length_prediction": 1440
+}
