@@ -1,33 +1,7 @@
 <?php
 require_once __DIR__ . '/config/config.php';
 require 'database/db_connect.php';
-
-// Function to get all columns from a table
-function getTableColumns($conn, $table_name) {
-    $columns = [];
-    $sql = "SHOW COLUMNS FROM $table_name";
-    
-    try {
-        $result = $conn->query($sql);
-
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $columns[] = $row['Field'];
-            }
-        }
-    } catch (mysqli_sql_exception $e) {
-        // If an error occurs, return an empty array
-        $columns[] = 'unknown';
-    }
-
-    if ($result && $result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $columns[] = $row['Field'];
-        }
-    }
-
-    return $columns;
-}
+require 'database/sql_query.php';
 
 // Initialize variables
 $servername = isset($servername) ? $servername : '';
@@ -83,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 $columns = getTableColumns($conn, $table_name);
 
 // Close the database connection
-$conn->close();
+closeDatabase($conn);
 ?>
 
 <!DOCTYPE html>

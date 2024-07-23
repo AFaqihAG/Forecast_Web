@@ -1,20 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 
-function getDatabase() {
-    global $servername, $username, $password, $dbname;
-
-    // Create a new connection
-    $conn = new mysqli($servername, $username, $password, $dbname);
-
-    // Check connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    return $conn;
-}
-
 function closeDatabase($conn) {
     $conn->close();
 }
@@ -56,4 +42,3 @@ function executeSQLAndGetColumns($conn, $table_name) {
         return false;
     }
 }
-?>

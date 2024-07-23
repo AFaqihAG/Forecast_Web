@@ -26,21 +26,9 @@ if __name__ == '__main__':
 
     # Read periods and date_increment_type from command-line arguments
     periods = int(sys.argv[1])
-    date_increment_type = sys.argv[2].lower()
-
-    # Map date_increment_type to pandas frequency strings
-    freq_map = {
-        'seconds': 'S',
-        'minutes': 'T',
-        'hours': 'H',
-        'days': 'D',
-        'months': 'M'  # Added for month increment
-    }
-    
-    freq = freq_map.get(date_increment_type, 'T')  # Default to 'T' if not found
 
     # Forecast data
-    result = forecast_data(input_data, periods, freq)
+    result = forecast_data(input_data, periods, 'D')
 
     # Output forecast result
     print(result)
