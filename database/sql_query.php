@@ -27,6 +27,21 @@ function getTableColumns($conn, $table_name) {
     return $columns;
 }
 
+// Function to get all table names from the database
+function getTableNames($conn) {
+    $tables = [];
+    $sql = "SHOW TABLES";
+    $result = $conn->query($sql);
+
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_row()) {
+            $tables[] = $row[0];
+        }
+    }
+
+    return $tables;
+}
+
 function executeSQLAndGetColumns($conn, $table_name) {
     // Prepare the SQL query to get all columns in the table
     $sql_columns = "SHOW COLUMNS FROM $table_name";

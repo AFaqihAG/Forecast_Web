@@ -4,7 +4,7 @@
     "password": "bukanpunyamu",
     "dbname": "punyaku",
     "table_name": "sales_spend_data",
-    "name_column": "Total_Spend",
+    "name_column": "Total_Sales",
     "date_column": "dates",
-    "length_prediction": 365
+    "length_prediction": "3600"
 }
