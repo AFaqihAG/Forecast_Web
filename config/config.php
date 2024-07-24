@@ -20,3 +20,4 @@ $table_name = $config_data['table_name'];
 $name_column = $config_data['name_column'];
 $date_column = $config_data['date_column'];
 $length_prediction = $config_data['length_prediction'];
+$date_increment_type = $config_data['date_increment_type'];

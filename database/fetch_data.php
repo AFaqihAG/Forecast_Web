@@ -5,6 +5,18 @@ require 'sql_query.php';
 
 global $table_name, $name_column, $date_column, $length_prediction;
 
+// Define the date increment type to MySQL DATE_FORMAT mapping
+$dateIncrementFormats = [
+    'seconds' => '%Y-%m-%d %H:%i:%s',
+    'minutes' => '%Y-%m-%d %H:%i',
+    'hours' => '%Y-%m-%d %H',
+    'days' => '%Y-%m-%d',
+    'month' => '%Y-%m'
+];
+
+// Use the default format if date_increment_type is not valid
+$format_date = isset($dateIncrementFormats[$date_increment_type]) ? $dateIncrementFormats[$date_increment_type] : '%Y-%m-%d %H:%i';
+
 // Execute the function to get columns
 $columns_list = executeSQLAndGetColumns($conn, $table_name);
 
@@ -13,8 +25,8 @@ $sql =
 "
 SELECT * FROM
 (
-    SELECT 
-        DATE_FORMAT($date_column, '%Y-%m-%d %H:%i') AS time_interval,
+    SELECT  
+        DATE_FORMAT($date_column, '$format_date') AS time_interval,
         AVG($name_column) AS average_value
     FROM $table_name
     GROUP BY time_interval
