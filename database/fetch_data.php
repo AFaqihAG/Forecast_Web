@@ -19,8 +19,8 @@ $format_date = isset($dateIncrementFormats[$date_increment_type]) ? $dateIncreme
 
 // Define the date increment type to MySQL DATE_FORMAT mapping
 $limitDataFormats = [
-    'seconds' => '86400',   // 86400 seconds (1 Day)
-    'minutes' => '43800',   // 43800 minutes (1 Month)
+    'seconds' => '10800',   // 10800 seconds (3 Hour)
+    'minutes' => '10080',   // 10080 minutes (1 Week)
     'hours' => '8766',      // 8766 hours (1 Year) 
     'days' => '3652',       // 3652 days (10 Year)
     'month' => '1200'       // 1200 months (100 Year)
