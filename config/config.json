@@ -3,9 +3,11 @@
     "username": "PUNYAKU",
     "password": "bukanpunyamu",
     "dbname": "punyaku",
-    "table_name": "sales_spend_data",
-    "name_column": "Spend",
-    "date_column": "Dates",
+    "table_name": "daily_min_temperatures_csv_zip",
+    "name_column": "Temp",
+    "date_column": "Date",
     "length_prediction": "3650",
-    "date_increment_type": "days"
+    "date_increment_type": "days",
+    "changepoint_prior_scale": "0.05",
+    "seasonality_prior_scale": "10"
 }

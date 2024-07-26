@@ -1,56 +1,5 @@
-<?php
-// Load config.json
-$configPath = 'config/config.json';
-$config = json_decode(file_get_contents($configPath), true);
+<?php require 'config/setting_config.php' ?>
 
-// Extract current settings
-$servername = isset($config['servername']) ? htmlspecialchars($config['servername']) : '';
-$username = isset($config['username']) ? htmlspecialchars($config['username']) : '';
-$password = isset($config['password']) ? htmlspecialchars($config['password']) : '';
-$dbname = isset($config['dbname']) ? htmlspecialchars($config['dbname']) : '';
-$table_name = isset($config['table_name']) ? htmlspecialchars($config['table_name']) : '';
-$name_column = isset($config['name_column']) ? htmlspecialchars($config['name_column']) : '';
-$date_column = isset($config['date_column']) ? htmlspecialchars($config['date_column']) : '';
-$length_prediction = isset($config['length_prediction']) ? htmlspecialchars($config['length_prediction']) : '';
-
-$error_message = '';
-$success_message = '';
-
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $servername = $_POST['servername'];
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-    $dbname = $_POST['dbname'];
-
-    // Validate the database connection
-    try {
-        $conn = new mysqli($servername, $username, $password, $dbname);
-        if ($conn->connect_error) {
-            throw new Exception("Connection failed: " . $conn->connect_error);
-        }
-        $conn->close();
-
-        // If connection is successful, save the new settings
-        $config = [
-            'servername' => $servername,
-            'username' => $username,
-            'password' => $password,
-            'dbname' => $dbname,
-            'table_name' => $table_name,
-            'name_column' => $name_column,
-            'date_column' => $date_column,
-            'length_prediction' => $length_prediction
-        ];
-
-        file_put_contents($configPath, json_encode($config, JSON_PRETTY_PRINT));
-        $success_message = 'Settings saved successfully.';
-    } catch (Exception $e) {
-        // Show error message if connection fails
-        $error_message = 'Failed to connect to the database. Please check your settings and try again.';
-    }
-}
-?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -58,18 +7,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap  -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 </head>
 <body>
     <?php include 'topbar.php'; ?>
 
     <div class="container mt-4">
-        <h1>Update Database Configuration</h1>
+        <h1>Database Configuration</h1>
 
         <form method="post">
             <div class="form-group">

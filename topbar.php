@@ -1,7 +1,7 @@
-<nav class="navbar navbar-expand-lg navbar-light sticky-top bg-light">
+<nav class="navbar navbar-expand-lg navbar-light sticky-top" style="background-color: #e3f2fd;">
     <div class="container-fluid">
         <!-- Main Menu -->
-        <a class="navbar-brand" href="index.php" id="dataForecastingLink">Data Forecasting</a>
+        <a class="navbar-brand" href="index.php" id="dataForecastingLink">Data Forecast</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>

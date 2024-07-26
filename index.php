@@ -1,78 +1,11 @@
-<?php
-// Load config.json
-$configPath = 'config/config.json';
-$config = json_decode(file_get_contents($configPath), true);
-
-// Extract current settings with default values
-$table_name = isset($config['table_name']) ? htmlspecialchars($config['table_name']) : '';
-$name_column = isset($config['name_column']) ? htmlspecialchars($config['name_column']) : '';
-$date_column = isset($config['date_column']) ? htmlspecialchars($config['date_column']) : '';
-$length_prediction = isset($config['length_prediction']) ? intval($config['length_prediction']) : 730;
-$date_increment_type = isset($config['date_increment_type']) ? htmlspecialchars($config['date_increment_type']) : '';
-
-$error_message = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Extract posted settings
-    $posted_table_name = $_POST['table_name'];
-    $posted_name_column = $_POST['name_column'];
-    $posted_date_column = $_POST['date_column'];
-    $posted_length_prediction = $_POST['length_prediction'];
-    $posted_date_increment_type = $_POST['date_increment_type'];
-
-    // Extract database settings
-    $servername = isset($config['servername']) ? htmlspecialchars($config['servername']) : '';
-    $username = isset($config['username']) ? htmlspecialchars($config['username']) : '';
-    $password = isset($config['password']) ? htmlspecialchars($config['password']) : '';
-    $dbname = isset($config['dbname']) ? htmlspecialchars($config['dbname']) : '';
-
-    try {
-        // Validate the database connection
-        $conn = new mysqli($servername, $username, $password, $dbname);
-        if ($conn->connect_error) {
-            throw new Exception("Connection failed: " . $conn->connect_error);
-        }
-        $conn->close();
-
-        // Update settings if connection is successful
-        $newConfig = [
-            'table_name' => $posted_table_name,
-            'name_column' => $posted_name_column,
-            'date_column' => $posted_date_column,
-            'length_prediction' => $posted_length_prediction,
-            'date_increment_type' => $posted_date_increment_type
-        ];
-
-        // Read the existing config
-        $existingConfig = json_decode(file_get_contents($configPath), true);
-
-        // Merge existing config with new settings
-        $updatedConfig = array_merge($existingConfig, $newConfig);
-
-        // Write the updated config to the file
-        file_put_contents($configPath, json_encode($updatedConfig, JSON_PRETTY_PRINT));
-
-        // Update local variables to reflect the new settings
-        $table_name = $posted_table_name;
-        $name_column = $posted_name_column;
-        $date_column = $posted_date_column;
-        $length_prediction = $posted_length_prediction;
-        $date_increment_type = $posted_date_increment_type;
-
-    } catch (Exception $e) {
-        $error_message = 'Failed to connect to the database. Please check your settings and try again.';
-    }
-}
-?>
-
-
+<?php require 'config/index_config.php'; ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Forecasting Display</title>
+    <title>Data Forecast Display</title>
     
     <!-- Bootstrap  -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
@@ -86,10 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Chart JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
 
     <!-- Pass PHP data to JavaScript -->
     <script>
         const nameColumn = '<?php echo $name_column; ?>';
+        const dateColumn = '<?php echo $date_column; ?>';
     </script>
 
     <!-- Custom JS -->
@@ -121,90 +56,108 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Configuration Settings Form -->
         <div class="mt-4">
             <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0 d-flex justify-content-between align-items-left">
-                        <button class="btn btn-light w-100 text-start bg-transparent border-0 " data-toggle="collapse" data-target="#configSettings" aria-expanded="true" aria-controls="configSettings">
+                <div class="card-header p-0 m-0" style="background-color: #e3f2fd;">
+                    <h5 class="mb-0 d-flex justify-content-between align-items-center">
+                        <button class="btn btn-light w-100 text-start bg-transparent border-0 shadow-none" data-toggle="collapse" data-target="#configSettings" aria-expanded="true" aria-controls="configSettings">
                             <span>Configuration Settings</span>
                         </button>
                     </h5>
                 </div>
+
                 <div id="configSettings" class="collapse show">
                     <div class="card-body">
-                    <form id="settingsForm" method="post">
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="table_name">Table Name</label>
-                                <select class="form-control" id="table_name" name="table_name" required>
-                                    <option value="" disabled>Select table</option>
-                                    <?php
-                                    require 'database/db_connect.php';
-                                    require 'database/sql_query.php';
+                        <form id="settingsForm" method="post">
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="table_name">Table Name</label>
+                                    <select class="form-control" id="table_name" name="table_name" required>
+                                        <?php
+                                        require 'database/db_connect.php';
+                                        require 'database/sql_query.php';
 
-                                    try {
-                                        $conn = new mysqli($servername, $username, $password, $dbname);
-                                        if ($conn->connect_error) {
-                                            throw new Exception("Connection failed: " . $conn->connect_error);
+                                        try {
+                                            $conn = new mysqli($servername, $username, $password, $dbname);
+                                            if ($conn->connect_error) {
+                                                throw new Exception("Connection failed: " . $conn->connect_error);
+                                            }
+                                            $tables = getTableNames($conn);
+                                            foreach ($tables as $table) {
+                                                echo "<option value=\"$table\"" . ($table === $table_name ? ' selected' : '') . ">" . htmlspecialchars($table) . "</option>";
+                                            }
+                                            closeDatabase($conn);
+                                        } catch (Exception $e) {
+                                            echo '<option value="" disabled>Error fetching tables</option>';
                                         }
-                                        $tables = getTableNames($conn);
-                                        foreach ($tables as $table) {
-                                            echo "<option value=\"$table\"" . ($table === $table_name ? ' selected' : '') . ">" . htmlspecialchars($table) . "</option>";
-                                        }
-                                        closeDatabase($conn);
-                                    } catch (Exception $e) {
-                                        echo '<option value="" disabled>Error fetching tables</option>';
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="date_column">Date Column</label>
-                                <select class="form-control" id="date_column" name="date_column" required>
-                                    <option value="" disabled>Select date column</option>
-                                    <!-- Options will be populated via AJAX -->
-                                </select>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="name_column">Name Column</label>
-                                <select class="form-control" id="name_column" name="name_column" required>
-                                    <option value="" disabled>Select name column</option>
-                                    <!-- Options will be populated via AJAX -->
-                                </select>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="length_prediction">Prediction Length</label>
-                                <input type="number" class="form-control" id="length_prediction" name="length_prediction" value="<?php echo htmlspecialchars($length_prediction); ?>" required>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="date_increment_type">Date Increment Type</label>
-                                <select class="form-control" id="date_increment_type" name="date_increment_type" required>
-                                    <option value="seconds">Seconds</option>
-                                    <option value="minutes">Minutes</option>
-                                    <option value="hours">Hours</option>
-                                    <option value="days">Days</option>
-                                    <option value="month">Month</option>
-                                </select>
-                            </div>
-                        </div>
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="date_column">Date Column</label>
+                                    <select class="form-control" id="date_column" name="date_column" required>
+                                        <option value="" disabled>Select date column</option>
+                                        <!-- Options will be populated via AJAX -->
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="name_column">Name Column</label>
+                                    <select class="form-control" id="name_column" name="name_column" required>
+                                        <option value="" disabled>Select name column</option>
+                                        <!-- Options will be populated via AJAX -->
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="length_prediction">Prediction Length</label>
+                                    <input type="number" class="form-control" id="length_prediction" name="length_prediction" value="<?php echo htmlspecialchars($length_prediction); ?>" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="date_increment_type">Date Increment Type</label>
+                                    <select class="form-control" id="date_increment_type" name="date_increment_type" required>
+                                        <option value="seconds">Seconds</option>
+                                        <option value="minutes">Minutes</option>
+                                        <option value="hours">Hours</option>
+                                        <option value="days">Days</option>
+                                        <option value="month">Month</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="changepoint_prior_scale">Changepoint Prior Scale</label>
+                                    <input type="number" step="0.01" min="0.01" max="0.5" class="form-control" id="changepoint_prior_scale" name="changepoint_prior_scale" value="<?php echo htmlspecialchars($changepoint_prior_scale); ?>" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="seasonality_prior_scale">Seasonality Prior Scale</label>
+                                    <input type="number" step="0.1" min="0.1" max="10" class="form-control" id="seasonality_prior_scale" name="seasonality_prior_scale" value="<?php echo htmlspecialchars($seasonality_prior_scale); ?>" required>
+                                </div>
+                                
+                                <!-- Button to toggle the description section -->
+                                <div class="form-group col-md-6 d-flex justify-content-end align-items-center">
+                                    <!-- Collapsible description section -->
+                                    <div id="descriptionSection" class="collapse mt-3">
+                                        <div class="card p-3">
+                                            <p><strong>Date Increment Type:</strong> Defines the time unit for data (seconds, minutes, hours, days, months).</p>
+                                            <p><strong>Prediction Length:</strong> Number of future periods to forecast based on Date Increment Type.</p>
+                                            <p><strong>Changepoint Prior Scale: <br> Do not change unless you understand its impact on detecting sudden shifts in your data. </strong> <br> Controls the model's sensitivity to abrupt changes in the time series data. A higher value allows the model to be more responsive to sudden shifts or changes, potentially capturing more abrupt changes but also risking overfitting. A lower value results in a smoother model that may overlook sudden changes but is less likely to overfit. It ranges from 0.01 to 0.5, with a default value of 0.05. Adjust this parameter based on the frequency and significance of changes in your data.</p>
+                                            <p><strong>Seasonality Prior Scale: <br> Avoid changing this value unless you are familiar with its effect on the model's seasonal sensitivity.</strong> <br> Adjusts the strength of seasonal patterns detected in the data. A higher value will emphasize the seasonal component, making the model more sensitive to recurring patterns. Conversely, a lower value will downplay seasonal effects, potentially improving the model's performance if seasonal patterns are less relevant. It ranges from 0.1 to 10.0, with a default value of 10.0. This parameter is particularly useful for datasets with strong, regular seasonal variations. Adjust based on how pronounced the seasonality is in your data.</p>
+                                        </div>
+                                    </div>
+                                    <!-- Question mark icon for collapsing the description section -->
+                                    <span class="ml-2" data-toggle="collapse" data-target="#descriptionSection" aria-expanded="false" aria-controls="descriptionSection">
+                                        <i class="bi bi-question-circle" style="font-size: 1.2rem; cursor: pointer;" title="Click to view descriptions"></i>
+                                    </span>
+                                </div>
 
-                        <div class="form-row">
-                            <div class="col text-center">
-                                <button type="submit" class="btn btn-primary">Run Forecast Model</button>
                             </div>
-                        </div>
-                    </form>
 
+                            <div class="form-row">
+                                <div class="col text-center">
+                                    <button type="submit" class="btn btn-primary">Run Forecast Model</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
 
-        
-        <!-- Rectangle Block at the Bottom -->
-        <footer class="bg-light border-top py-3 mt-4">
-            <div class="container text-center">
-                <p class="mb-0">Bla Bla Bla Bla Bla Bla Bla</p>
-            </div>
-        </footer>
 
     </div>
 

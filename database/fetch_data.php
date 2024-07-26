@@ -17,6 +17,17 @@ $dateIncrementFormats = [
 // Use the default format if date_increment_type is not valid
 $format_date = isset($dateIncrementFormats[$date_increment_type]) ? $dateIncrementFormats[$date_increment_type] : '%Y-%m-%d %H:%i';
 
+// Define the date increment type to MySQL DATE_FORMAT mapping
+$limitDataFormats = [
+    'seconds' => '86400',   // 86400 seconds (1 Day)
+    'minutes' => '43800',   // 43800 minutes (1 Month)
+    'hours' => '8766',      // 8766 hours (1 Year) 
+    'days' => '3652',       // 3652 days (10 Year)
+    'month' => '1200'       // 1200 months (100 Year)
+];
+
+$limitData = isset($limitDataFormats[$date_increment_type]) ? $limitDataFormats[$date_increment_type] : '9999';
+
 // Execute the function to get columns
 $columns_list = executeSQLAndGetColumns($conn, $table_name);
 
@@ -30,7 +41,7 @@ SELECT * FROM
         AVG($name_column) AS average_value
     FROM $table_name
     GROUP BY time_interval
-    ORDER BY time_interval DESC LIMIT 3650
+    ORDER BY time_interval DESC LIMIT $limitData
 ) as temp
 ORDER BY time_interval ASC;
 ";

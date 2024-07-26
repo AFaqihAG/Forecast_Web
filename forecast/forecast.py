@@ -3,13 +3,16 @@ import pandas as pd
 import json
 import sys
 
-def forecast_data(data, periods, freq):
+def forecast_data(data, periods, freq, changepoint, seasonality):
     # Process data into a DataFrame compatible with Prophet
     df = pd.DataFrame(data)
     df.columns = ['ds', 'y']  # Assuming 'ds' is datetime and 'y' is the value
 
     # Fit Prophet model
-    model = Prophet()
+    model = Prophet(
+        changepoint_prior_scale= changepoint,
+        seasonality_prior_scale=seasonality
+    )
     model.fit(df)
 
     # Make future predictions with the specified frequency
@@ -29,21 +32,27 @@ def get_frequency(date_increment_type):
         'days': 'D',
         'month': 'M'
     }
-    return freq_mapping.get(date_increment_type, 'D')  # Default to 'D' for days if type is unknown
+    return freq_mapping.get(date_increment_type, 'H')  # Default to 'D' for days if type is unknown
 
 if __name__ == '__main__':
+    # Load configuration
+    with open('../config/config.json', 'r') as f:
+        config = json.load(f)
+        
+    # Retrieve changepoint_prior_scale and seasonality_prior_scale
+    changepoint_prior_scale = float(config.get('changepoint_prior_scale', 0.05))
+    seasonality_prior_scale = float(config.get('seasonality_prior_scale', 10.0))
+    length_prediction = int(config.get('length_prediction', 100))
+    date_increment_type = config.get('date_increment_type', 'hours')
+    
     # Read input data from PHP via stdin
     input_data = json.loads(sys.stdin.read())
-
-    # Read periods and date_increment_type from command-line arguments
-    periods = int(sys.argv[1])
-    date_increment_type = sys.argv[2]  # Get date_increment_type from command-line arguments
 
     # Get the appropriate frequency for Prophet
     freq = get_frequency(date_increment_type)
 
     # Forecast data
-    result = forecast_data(input_data, periods, freq)
+    result = forecast_data(input_data, length_prediction, freq, changepoint_prior_scale, seasonality_prior_scale)
 
     # Output forecast result
     print(result)
