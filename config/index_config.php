@@ -13,6 +13,7 @@ $changepoint_prior_scale = isset($config['changepoint_prior_scale']) ? floatval(
 $seasonality_prior_scale = isset($config['seasonality_prior_scale']) ? floatval($config['seasonality_prior_scale']) : 10.0;
 
 $error_message = '';
+$db_connection_failed = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Extract posted settings
@@ -34,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Validate the database connection
         $conn = new mysqli($servername, $username, $password, $dbname);
         if ($conn->connect_error) {
+            // $db_connection_failed = true;
             throw new Exception("Connection failed: " . $conn->connect_error);
         }
         $conn->close();

@@ -1,5 +1,4 @@
 $(document).ready(function () {
-
   // Populate columns when table is selected
   $("#table_name").change(function () {
     var tableName = $(this).val();
@@ -210,10 +209,10 @@ $(document).ready(function () {
                     <tbody>
                       <tr>
                         <td>Original Data</td>
-                        <td>${historicalStats.average.toFixed(2)}</td>
-                        <td>${historicalStats.median.toFixed(2)}</td>
-                        <td>${historicalStats.highest.toFixed(2)}</td>
-                        <td>${historicalStats.lowest.toFixed(2)}</td>
+                        <td>${historicalStats.average.toFixed(3)}</td>
+                        <td>${historicalStats.median.toFixed(3)}</td>
+                        <td>${historicalStats.highest.toFixed(3)}</td>
+                        <td>${historicalStats.lowest.toFixed(3)}</td>
                         <td>${historicalStats.averageSlopeIncrease.toFixed(6)}</td>
                         <td>${historicalStats.standardDeviation.toFixed(6)}</td>
                       </tr>

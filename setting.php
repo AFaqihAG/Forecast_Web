@@ -42,6 +42,11 @@
             </div>
             <button type="submit" class="btn btn-primary">Save Settings</button>
         </form>
+        
+        <!-- Add spacing above this button -->
+        <div class="mt-3">
+            <a href="index.php" class="btn btn-primary">Back to Main Menu</a>
+        </div>
     </div>
 
     <!-- Success Modal -->

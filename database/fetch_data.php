@@ -37,9 +37,9 @@ $sql =
 SELECT * FROM
 (
     SELECT  
-        DATE_FORMAT($date_column, '$format_date') AS time_interval,
-        AVG($name_column) AS average_value
-    FROM $table_name
+        DATE_FORMAT(`$date_column`, '$format_date') AS time_interval,
+        AVG(`$name_column`) AS average_value
+    FROM `$table_name`
     GROUP BY time_interval
     ORDER BY time_interval DESC LIMIT $limitData
 ) as temp
